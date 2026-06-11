@@ -58,7 +58,7 @@
 		"cross-spawn": "^7.0.6",
 		"dotenv": "^17.2.4",
 		"graphql": "^16.13.1",
-		"ink": "^6.7.0",
+		"ink": "^7.0.0",
 		"ink-stepper": "^0.2.1",
 		"ink-task-list": "^2.0.0",
 		"ink-virtual-list": "^0.2.3",
