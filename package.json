@@ -67,7 +67,7 @@
 		"zod": "^4.3.6"
 	},
 	"optionalDependencies": {
-		"puppeteer": "^24.37.2"
+		"puppeteer": "^25.0.0"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.4.1",
