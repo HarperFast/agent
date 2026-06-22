@@ -52,7 +52,7 @@
 		"@harperfast/skills": "^1.2.0",
 		"@inkjs/ui": "^2.0.0",
 		"@openai/agents": "^0.11.0",
-		"@openai/agents-extensions": "^0.8.0",
+		"@openai/agents-extensions": "^0.11.0",
 		"ai": "^6.0.79",
 		"chalk": "^5.6.2",
 		"cross-spawn": "^7.0.6",
