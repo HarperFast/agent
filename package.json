@@ -45,6 +45,11 @@
 	],
 	"license": "None",
 	"type": "module",
+	"overrides": {
+		"ink-stepper": {
+			"ink": "^7.0.0"
+		}
+	},
 	"dependencies": {
 		"@ai-sdk/anthropic": "^3.0.41",
 		"@ai-sdk/google": "^3.0.24",
