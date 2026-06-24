@@ -14,7 +14,12 @@ export function ProviderStep(
 ) {
 	const { disableNavigation, enableNavigation } = useStepperInput();
 	const sortedProviders = useMemo(
-		() => providers.sort((a, b) => a.label === defaultValue ? -1 : a.label.localeCompare(b.label)),
+		() =>
+			[...providers].sort((a, b) => {
+				if (a.label === defaultValue) { return -1; }
+				if (b.label === defaultValue) { return 1; }
+				return a.label.localeCompare(b.label);
+			}),
 		[defaultValue],
 	);
 
