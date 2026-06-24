@@ -3,9 +3,9 @@
 	"description": "AI to help you with Harper app management",
 	"version": "0.16.17",
 	"main": "dist/cli.js",
-	"repository": "github:HarperFast/harper-agent",
+	"repository": "github:HarperFast/agent",
 	"bugs": {
-		"url": "https://github.com/harperfast/harper-agent/issues"
+		"url": "https://github.com/HarperFast/agent/issues"
 	},
 	"homepage": "https://github.com/harperfast",
 	"scripts": {
