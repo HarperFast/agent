@@ -31,6 +31,17 @@ const down = '\u001B[B';
 // const left = '\u001B[D';
 const enter = '\r';
 
+// Ink re-renders asynchronously after stdin writes; polling for the expected
+// frame avoids the flakiness of a fixed-duration sleep under CI load.
+const waitForFrame = (lastFrame: () => string | undefined, text: string) =>
+	vi.waitFor(() => expect(lastFrame()).toContain(text));
+
+// ApiKeyStep renders input as a password field, masking typed characters as
+// `*`. Wait for the masked value before submitting so the keystrokes have
+// actually reached component state.
+const waitForMaskedInput = (lastFrame: () => string | undefined, text: string) =>
+	vi.waitFor(() => expect(lastFrame()).toContain('*'.repeat(text.length)));
+
 describe('MainConfig', () => {
 	const mockExit = vi.fn();
 
@@ -74,35 +85,30 @@ describe('MainConfig', () => {
 		const onComplete = vi.fn();
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
-		const simulateKey = async (char: string) => {
-			stdin.write(char);
-			// Wait for re-render
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		};
-
 		// 1. ProviderStep - Choose OpenAI (default)
-		expect(lastFrame()).toContain('What model provider would you like to use today?');
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
+		stdin.write(enter);
 
 		// 2. ApiKeyStep
-		expect(lastFrame()).toContain('Can you provide us with your OpenAI API key?');
-		await simulateKey('sk-test-key');
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'Can you provide us with your OpenAI API key?');
+		stdin.write('sk-test-key');
+		await waitForMaskedInput(lastFrame, 'sk-test-key');
+		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
-		expect(lastFrame()).toContain('What model would you like to use?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model would you like to use?');
+		stdin.write(enter); // Accept default
 
 		// 4. ModelSelectionStep - Compactor
-		expect(lastFrame()).toContain('What model should we use for memory compaction?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model should we use for memory compaction?');
+		stdin.write(enter); // Accept default
 
 		// 5. EnvironmentSettingsStep
-		expect(lastFrame()).toContain('Additional Settings');
-		await simulateKey(enter); // Accept defaults
+		await waitForFrame(lastFrame, 'Additional Settings');
+		stdin.write(enter); // Accept defaults
 
 		// Verification
-		expect(onComplete).toHaveBeenCalled();
+		await vi.waitFor(() => expect(onComplete).toHaveBeenCalled());
 		expect(vi.mocked(writeFileSync)).toHaveBeenCalled();
 
 		// Check process.env
@@ -115,36 +121,31 @@ describe('MainConfig', () => {
 		const onComplete = vi.fn();
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
-		const simulateKey = async (char: string) => {
-			stdin.write(char);
-			// Wait for re-render
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		};
-
 		// 1. ProviderStep - Choose Anthropic
-		expect(lastFrame()).toContain('What model provider would you like to use today?');
-		await simulateKey(down); // to Anthropic
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
+		stdin.write(down); // to Anthropic
+		stdin.write(enter);
 
 		// 2. ApiKeyStep
-		expect(lastFrame()).toContain('Can you provide us with your Anthropic API key?');
-		await simulateKey('sk-ant-test-key');
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'Can you provide us with your Anthropic API key?');
+		stdin.write('sk-ant-test-key');
+		await waitForMaskedInput(lastFrame, 'sk-ant-test-key');
+		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
-		expect(lastFrame()).toContain('What model would you like to use?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model would you like to use?');
+		stdin.write(enter); // Accept default
 
 		// 4. ModelSelectionStep - Compactor
-		expect(lastFrame()).toContain('What model should we use for memory compaction?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model should we use for memory compaction?');
+		stdin.write(enter); // Accept default
 
 		// 5. EnvironmentSettingsStep
-		expect(lastFrame()).toContain('Additional Settings');
-		await simulateKey(enter); // Accept defaults
+		await waitForFrame(lastFrame, 'Additional Settings');
+		stdin.write(enter); // Accept defaults
 
 		// Verification
-		expect(onComplete).toHaveBeenCalled();
+		await vi.waitFor(() => expect(onComplete).toHaveBeenCalled());
 		expect(vi.mocked(writeFileSync)).toHaveBeenCalled();
 
 		// Check process.env
@@ -157,37 +158,32 @@ describe('MainConfig', () => {
 		const onComplete = vi.fn();
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
-		const simulateKey = async (char: string) => {
-			stdin.write(char);
-			// Wait for re-render
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		};
-
 		// 1. ProviderStep - Choose Google
-		expect(lastFrame()).toContain('What model provider would you like to use today?');
-		await simulateKey(down); // to Anthropic
-		await simulateKey(down); // to Google
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
+		stdin.write(down); // to Anthropic
+		stdin.write(down); // to Google
+		stdin.write(enter);
 
 		// 2. ApiKeyStep
-		expect(lastFrame()).toContain('Can you provide us with your Google API key?');
-		await simulateKey('google-test-key');
-		await simulateKey(enter);
+		await waitForFrame(lastFrame, 'Can you provide us with your Google API key?');
+		stdin.write('google-test-key');
+		await waitForMaskedInput(lastFrame, 'google-test-key');
+		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
-		expect(lastFrame()).toContain('What model would you like to use?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model would you like to use?');
+		stdin.write(enter); // Accept default
 
 		// 4. ModelSelectionStep - Compactor
-		expect(lastFrame()).toContain('What model should we use for memory compaction?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model should we use for memory compaction?');
+		stdin.write(enter); // Accept default
 
 		// 5. EnvironmentSettingsStep
-		expect(lastFrame()).toContain('Additional Settings');
-		await simulateKey(enter); // Accept defaults
+		await waitForFrame(lastFrame, 'Additional Settings');
+		stdin.write(enter); // Accept defaults
 
 		// Verification
-		expect(onComplete).toHaveBeenCalled();
+		await vi.waitFor(() => expect(onComplete).toHaveBeenCalled());
 		expect(vi.mocked(writeFileSync)).toHaveBeenCalled();
 
 		// Check process.env
@@ -200,38 +196,32 @@ describe('MainConfig', () => {
 		const onComplete = vi.fn();
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
-		const simulateKey = async (char: string) => {
-			stdin.write(char);
-			// Wait for re-render
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		};
-
 		// 1. ProviderStep - Choose Ollama
-		expect(lastFrame()).toContain('What model provider would you like to use today?');
+		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
 
-		await simulateKey(down); // to Anthropic
-		await simulateKey(down); // to Google
-		await simulateKey(down); // to Ollama
-		await simulateKey(enter);
+		stdin.write(down); // to Anthropic
+		stdin.write(down); // to Google
+		stdin.write(down); // to Ollama
+		stdin.write(enter);
 
 		// 2. ApiUrlStep (since provider is Ollama)
-		expect(lastFrame()).toContain('Where are you hosting Ollama?');
-		await simulateKey(enter); // Accept default http://localhost:11434/api
+		await waitForFrame(lastFrame, 'Where are you hosting Ollama?');
+		stdin.write(enter); // Accept default http://localhost:11434/api
 
 		// 3. ModelSelectionStep - Model
-		expect(lastFrame()).toContain('What model would you like to use?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model would you like to use?');
+		stdin.write(enter); // Accept default
 
 		// 4. ModelSelectionStep - Compactor
-		expect(lastFrame()).toContain('What model should we use for memory compaction?');
-		await simulateKey(enter); // Accept default
+		await waitForFrame(lastFrame, 'What model should we use for memory compaction?');
+		stdin.write(enter); // Accept default
 
 		// 5. EnvironmentSettingsStep
-		expect(lastFrame()).toContain('Additional Settings');
-		await simulateKey(enter); // Accept defaults
+		await waitForFrame(lastFrame, 'Additional Settings');
+		stdin.write(enter); // Accept defaults
 
 		// Verification
-		expect(onComplete).toHaveBeenCalled();
+		await vi.waitFor(() => expect(onComplete).toHaveBeenCalled());
 		expect(vi.mocked(writeFileSync)).toHaveBeenCalled();
 
 		// Check process.env
