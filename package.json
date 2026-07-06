@@ -86,7 +86,7 @@
 		"@types/react": "^19.2.4",
 		"@vitest/coverage-v8": "^4.0.18",
 		"conventional-changelog-conventionalcommits": "^9.1.0",
-		"dprint": "^0.54.0",
+		"dprint": "^0.55.0",
 		"express": "^5.2.1",
 		"harper": "^5.0.10",
 		"hono": "^4.11.9",
