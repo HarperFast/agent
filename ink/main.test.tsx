@@ -4,6 +4,7 @@ import { existsSync, writeFileSync } from 'node:fs';
 import React, { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchOllamaModels } from '../utils/ollama/fetchOllamaModels';
+import { providers } from './configurationWizard/providers';
 import { emitToListeners } from './emitters/listener';
 import { MainConfig } from './main';
 
@@ -47,29 +48,26 @@ const waitForFrame = async (lastFrame: () => string | undefined, text: string) =
 // ApiKeyStep renders input as a password field, masking typed characters as `*`.
 const maskFor = (value: string) => '*'.repeat(value.length);
 
-// ProviderStep sorts the current provider first and the rest alphabetically, so
-// from the default (OpenAI) this is the order the down arrow walks. Confirming
-// each highlight in turn means a keypress that has not landed yet fails here
-// rather than selecting the wrong provider further down.
-const providerOrder = ['OpenAI', 'Anthropic', 'Google', 'Ollama'];
-
+// Walk the highlight down to `provider` rather than assuming how ProviderStep
+// sorts its options, so this keeps working if that sort changes. Stepping one row
+// at a time (instead of writing several downs then enter) means a keypress that
+// has not landed yet fails here rather than selecting the wrong provider.
 const selectProvider = async (
 	lastFrame: () => string | undefined,
 	stdin: { write: (data: string) => void },
 	provider: string,
 ) => {
-	const target = providerOrder.indexOf(provider);
-	if (target === -1) {
-		// Without this the slice below is empty and the walkthrough would quietly
-		// run against the default provider instead of the one asked for.
-		throw new Error(`Unknown provider ${provider}, expected one of ${providerOrder.join(', ')}`);
+	const highlighted = `❯ ${provider}`;
+	await waitForFrame(lastFrame, 'What model provider would you like to use today?');
+
+	// Bounded by the option count so a label that never highlights fails the
+	// assertion below rather than looping forever.
+	for (let row = 0; row < providers.length && !lastFrame()?.includes(highlighted); row++) {
+		stdin.write(down);
+		await settle();
 	}
 
-	await waitForFrame(lastFrame, 'What model provider would you like to use today?');
-	for (const name of providerOrder.slice(1, target + 1)) {
-		stdin.write(down);
-		await waitForFrame(lastFrame, `❯ ${name}`);
-	}
+	await waitForFrame(lastFrame, highlighted);
 	stdin.write(enter);
 };
 
