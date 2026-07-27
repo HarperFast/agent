@@ -1,7 +1,7 @@
 import { useApp } from 'ink';
 import { render } from 'ink-testing-library';
 import { existsSync, writeFileSync } from 'node:fs';
-import React from 'react';
+import React, { act } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchOllamaModels } from '../utils/ollama/fetchOllamaModels';
 import { emitToListeners } from './emitters/listener';
@@ -31,16 +31,47 @@ const down = '\u001B[B';
 // const left = '\u001B[D';
 const enter = '\r';
 
+// Ink paints a frame during render, but `useInput` subscribes to stdin in a
+// passive effect. Between those two points the previous step is what is still
+// listening, so a write made after only asserting on the frame is delivered to
+// the step we just left and silently dropped. Flushing effects closes that gap.
+const settle = () => act(async () => {});
+
 // Ink re-renders asynchronously after stdin writes; polling for the expected
 // frame avoids the flakiness of a fixed-duration sleep under CI load.
-const waitForFrame = (lastFrame: () => string | undefined, text: string) =>
-	vi.waitFor(() => expect(lastFrame()).toContain(text));
+const waitForFrame = async (lastFrame: () => string | undefined, text: string) => {
+	await vi.waitFor(() => expect(lastFrame()).toContain(text));
+	await settle();
+};
 
-// ApiKeyStep renders input as a password field, masking typed characters as
-// `*`. Wait for the masked value before submitting so the keystrokes have
-// actually reached component state.
-const waitForMaskedInput = (lastFrame: () => string | undefined, text: string) =>
-	vi.waitFor(() => expect(lastFrame()).toContain('*'.repeat(text.length)));
+// ApiKeyStep renders input as a password field, masking typed characters as `*`.
+const maskFor = (value: string) => '*'.repeat(value.length);
+
+// ProviderStep sorts the current provider first and the rest alphabetically, so
+// from the default (OpenAI) this is the order the down arrow walks. Confirming
+// each highlight in turn means a keypress that has not landed yet fails here
+// rather than selecting the wrong provider further down.
+const providerOrder = ['OpenAI', 'Anthropic', 'Google', 'Ollama'];
+
+const selectProvider = async (
+	lastFrame: () => string | undefined,
+	stdin: { write: (data: string) => void },
+	provider: string,
+) => {
+	const target = providerOrder.indexOf(provider);
+	if (target === -1) {
+		// Without this the slice below is empty and the walkthrough would quietly
+		// run against the default provider instead of the one asked for.
+		throw new Error(`Unknown provider ${provider}, expected one of ${providerOrder.join(', ')}`);
+	}
+
+	await waitForFrame(lastFrame, 'What model provider would you like to use today?');
+	for (const name of providerOrder.slice(1, target + 1)) {
+		stdin.write(down);
+		await waitForFrame(lastFrame, `❯ ${name}`);
+	}
+	stdin.write(enter);
+};
 
 describe('MainConfig', () => {
 	const mockExit = vi.fn();
@@ -72,10 +103,13 @@ describe('MainConfig', () => {
 		expect(lastFrame()).toContain('What model provider would you like to use today?');
 	});
 
-	it('calls exit when ExitUI event is emitted', () => {
+	it('calls exit when ExitUI event is emitted', async () => {
 		const onComplete = vi.fn();
 		render(<MainConfig onComplete={onComplete} />);
 
+		// useListener subscribes in an effect, so emitting before effects flush
+		// would miss the listener entirely.
+		await settle();
 		emitToListeners('ExitUI', undefined);
 
 		expect(mockExit).toHaveBeenCalled();
@@ -86,13 +120,12 @@ describe('MainConfig', () => {
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
 		// 1. ProviderStep - Choose OpenAI (default)
-		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
-		stdin.write(enter);
+		await selectProvider(lastFrame, stdin, 'OpenAI');
 
 		// 2. ApiKeyStep
 		await waitForFrame(lastFrame, 'Can you provide us with your OpenAI API key?');
 		stdin.write('sk-test-key');
-		await waitForMaskedInput(lastFrame, 'sk-test-key');
+		await waitForFrame(lastFrame, maskFor('sk-test-key'));
 		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
@@ -122,14 +155,12 @@ describe('MainConfig', () => {
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
 		// 1. ProviderStep - Choose Anthropic
-		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
-		stdin.write(down); // to Anthropic
-		stdin.write(enter);
+		await selectProvider(lastFrame, stdin, 'Anthropic');
 
 		// 2. ApiKeyStep
 		await waitForFrame(lastFrame, 'Can you provide us with your Anthropic API key?');
 		stdin.write('sk-ant-test-key');
-		await waitForMaskedInput(lastFrame, 'sk-ant-test-key');
+		await waitForFrame(lastFrame, maskFor('sk-ant-test-key'));
 		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
@@ -159,15 +190,12 @@ describe('MainConfig', () => {
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
 		// 1. ProviderStep - Choose Google
-		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
-		stdin.write(down); // to Anthropic
-		stdin.write(down); // to Google
-		stdin.write(enter);
+		await selectProvider(lastFrame, stdin, 'Google');
 
 		// 2. ApiKeyStep
 		await waitForFrame(lastFrame, 'Can you provide us with your Google API key?');
 		stdin.write('google-test-key');
-		await waitForMaskedInput(lastFrame, 'google-test-key');
+		await waitForFrame(lastFrame, maskFor('google-test-key'));
 		stdin.write(enter);
 
 		// 3. ModelSelectionStep - Model
@@ -197,12 +225,7 @@ describe('MainConfig', () => {
 		const { lastFrame, stdin } = render(<MainConfig onComplete={onComplete} />);
 
 		// 1. ProviderStep - Choose Ollama
-		await waitForFrame(lastFrame, 'What model provider would you like to use today?');
-
-		stdin.write(down); // to Anthropic
-		stdin.write(down); // to Google
-		stdin.write(down); // to Ollama
-		stdin.write(enter);
+		await selectProvider(lastFrame, stdin, 'Ollama');
 
 		// 2. ApiUrlStep (since provider is Ollama)
 		await waitForFrame(lastFrame, 'Where are you hosting Ollama?');
