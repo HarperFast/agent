@@ -29,6 +29,11 @@
 			],
 			"matchCurrentVersion": "!/^0/",
 			"automerge": true
+		},
+		{
+			"description": "Hold conventional-changelog-conventionalcommits on v9: @semantic-release/release-notes-generator@14 bundles the Handlebars conventional-changelog-writer@8, and preset v10's function-based templates render empty release notes under writer@8. Drop once release-notes-generator ships a writer@9 major.",
+			"matchPackageNames": ["conventional-changelog-conventionalcommits"],
+			"allowedVersions": "<10"
 		}
 	]
 }
