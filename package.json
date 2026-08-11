@@ -51,7 +51,7 @@
 		}
 	},
 	"dependencies": {
-		"@ai-sdk/anthropic": "^3.0.41",
+		"@ai-sdk/anthropic": "^4.0.0",
 		"@ai-sdk/google": "^3.0.24",
 		"@ai-sdk/openai": "^3.0.26",
 		"@harperfast/skills": "^1.2.0",
