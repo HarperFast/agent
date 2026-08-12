@@ -1,7 +1,7 @@
 {
 	"name": "@harperfast/agent",
 	"description": "AI to help you with Harper app management",
-	"version": "0.16.37",
+	"version": "0.16.38",
 	"main": "dist/cli.js",
 	"repository": "github:HarperFast/agent",
 	"bugs": {
