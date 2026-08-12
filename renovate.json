@@ -34,6 +34,18 @@
 			"description": "Hold conventional-changelog-conventionalcommits on v9: @semantic-release/release-notes-generator@14 bundles the Handlebars conventional-changelog-writer@8, and preset v10's function-based templates render empty release notes under writer@8. Drop once release-notes-generator ships a writer@9 major.",
 			"matchPackageNames": ["conventional-changelog-conventionalcommits"],
 			"allowedVersions": "<10"
+		},
+		{
+			"description": "Move the AI SDK as one set: every @ai-sdk/* provider, `ai` itself, and ollama-ai-provider-v2 must resolve to the same @ai-sdk/provider major, because that major defines the model `specificationVersion`. A lone provider major installs cleanly and passes CI, then throws at runtime — @openai/agents-extensions' aisdk() rejects a spec version it was not built for.",
+			"groupName": "AI SDK",
+			"groupSlug": "ai-sdk",
+			"matchPackageNames": ["ai", "@ai-sdk/**", "ollama-ai-provider-v2"]
+		},
+		{
+			"description": "Move the OpenAI Agents SDK as one set: @openai/agents and @openai/agents-extensions each pin an exact @openai/agents-core, so bumping one alone leaves two agents-core majors in a single tree.",
+			"groupName": "OpenAI Agents SDK",
+			"groupSlug": "openai-agents",
+			"matchPackageNames": ["@openai/agents", "@openai/agents-extensions"]
 		}
 	]
 }
