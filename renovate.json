@@ -11,6 +11,7 @@
 	"minimumReleaseAge": "3 days",
 	"internalChecksFilter": "strict",
 	"lockFileMaintenance": { "enabled": false },
+	"skipInstalls": false,
 	"packageRules": [
 		{
 			"groupName": "pin digests",
