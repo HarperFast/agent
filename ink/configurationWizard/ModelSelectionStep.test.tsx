@@ -1,13 +1,8 @@
 import { useInput } from 'ink';
-import { useStepperInput } from 'ink-stepper';
 import { render } from 'ink-testing-library';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ModelSelectionStep } from './ModelSelectionStep';
-
-vi.mock('ink-stepper', () => ({
-	useStepperInput: vi.fn(),
-}));
 
 vi.mock('ink', async () => {
 	const actual = await vi.importActual('ink');
@@ -18,15 +13,8 @@ vi.mock('ink', async () => {
 });
 
 describe('ModelSelectionStep', () => {
-	const mockDisableNavigation = vi.fn();
-	const mockEnableNavigation = vi.fn();
-
 	beforeEach(() => {
 		vi.clearAllMocks();
-		(useStepperInput as any).mockReturnValue({
-			disableNavigation: mockDisableNavigation,
-			enableNavigation: mockEnableNavigation,
-		});
 	});
 
 	it('renders title and models', () => {

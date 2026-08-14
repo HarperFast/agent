@@ -1,7 +1,6 @@
 import { MultiSelect } from '@inkjs/ui';
 import { Box, Text, useInput } from 'ink';
-import { useStepperInput } from 'ink-stepper';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { updateEnv } from '../../utils/files/updateEnv';
 
 interface Props {
@@ -38,13 +37,6 @@ const SETTINGS = [
 ];
 
 export function EnvironmentSettingsStep({ onConfirm, onBack }: Props) {
-	const { disableNavigation, enableNavigation } = useStepperInput();
-
-	useEffect(() => {
-		disableNavigation();
-		return () => enableNavigation();
-	}, [disableNavigation, enableNavigation]);
-
 	useInput((_input, key) => {
 		if (key.escape) {
 			onBack();
