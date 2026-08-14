@@ -53,12 +53,18 @@ export function ConfigurationWizard({ onComplete }: Props) {
 		? [...new Set([...ollamaModels, ...compactorModelsByProvider[provider]])]
 		: compactorModelsByProvider[provider];
 
+	// Every step owns its own keys: its input widget consumes <enter> and advances by calling
+	// goNext() from onConfirm, and each step binds <esc> itself. The Stepper's built-in
+	// bindings would double-handle <enter> on top of that, which is why every step used to
+	// switch them off via disableNavigation() for its whole lifetime. Saying keyboardNav={false}
+	// once states that directly, and leaves goNext() free of however the library happens to
+	// gate its own navigation — ink-stepper 0.2.3 extended that gate to programmatic calls.
 	return (
 		<Box flexDirection="column" padding={1} minHeight={10}>
 			<Stepper
 				onComplete={onComplete}
 				onCancel={curryEmitToListeners('ExitUI', undefined)}
-				keyboardNav={true}
+				keyboardNav={false}
 				renderProgress={StepperProgress}
 			>
 				<Step name="AI Provider">

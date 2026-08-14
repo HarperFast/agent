@@ -1,7 +1,6 @@
 import { Select } from '@inkjs/ui';
 import { Box, Text, useInput } from 'ink';
-import { useStepperInput } from 'ink-stepper';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BlinkingTextInput } from '../components/BlinkingTextInput';
 import { emitToListeners } from '../emitters/listener';
 
@@ -18,13 +17,7 @@ export function ModelSelectionStep({
 	onConfirm: (model: string) => void;
 	onBack: () => void;
 }) {
-	const { disableNavigation, enableNavigation } = useStepperInput();
 	const [isCustom, setIsCustom] = useState(false);
-
-	useEffect(() => {
-		disableNavigation();
-		return () => enableNavigation();
-	}, [isCustom, disableNavigation, enableNavigation]);
 
 	useInput((input, key) => {
 		if (key.escape) {

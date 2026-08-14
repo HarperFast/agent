@@ -1,6 +1,5 @@
 import { Box, Text, useInput } from 'ink';
-import { useStepperInput } from 'ink-stepper';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BlinkingTextInput } from '../components/BlinkingTextInput';
 import { emitToListeners } from '../emitters/listener';
 import type { ModelProvider } from '../models/config';
@@ -13,13 +12,6 @@ export function ApiKeyStep(
 		onBack: () => void;
 	},
 ) {
-	const { disableNavigation, enableNavigation } = useStepperInput();
-
-	useEffect(() => {
-		disableNavigation();
-		return () => enableNavigation();
-	}, [disableNavigation, enableNavigation]);
-
 	useInput((input, key) => {
 		if (key.escape) {
 			onBack();

@@ -1,7 +1,6 @@
 import { Select } from '@inkjs/ui';
 import { Box, Text, useInput } from 'ink';
-import { useStepperInput } from 'ink-stepper';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { ModelProvider } from '../models/config';
 import { providers } from './providers';
 
@@ -12,7 +11,6 @@ export function ProviderStep(
 		onExit: () => void;
 	},
 ) {
-	const { disableNavigation, enableNavigation } = useStepperInput();
 	const sortedProviders = useMemo(
 		() =>
 			[...providers].sort((a, b) => {
@@ -22,11 +20,6 @@ export function ProviderStep(
 			}),
 		[defaultValue],
 	);
-
-	useEffect(() => {
-		disableNavigation();
-		return () => enableNavigation();
-	}, [disableNavigation, enableNavigation]);
 
 	useInput((input, key) => {
 		if (key.escape) {
