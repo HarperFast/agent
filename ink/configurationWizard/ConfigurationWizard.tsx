@@ -37,12 +37,12 @@ export function ConfigurationWizard({ onComplete }: Props) {
 		}
 	}, [provider]);
 
+	// <esc> is owned per-step (back-navigation, or leaving a sub-mode); the wizard only binds
+	// global exit keys here. Handling <esc> at this level too would double-fire with the active
+	// step — Ink delivers input to every mounted useInput — and complete the wizard instead.
 	useInput((input, key) => {
 		if (key.ctrl && input === 'x') {
 			emitToListeners('ExitUI', undefined);
-		}
-		if (key.escape) {
-			onComplete();
 		}
 	});
 

@@ -39,4 +39,14 @@ describe('ConfigurationWizard', () => {
 
 		expect(emitToListeners).toHaveBeenCalledWith('ExitUI', undefined);
 	});
+
+	it('does not complete the wizard on <esc> (each step owns back-navigation)', () => {
+		const onComplete = vi.fn();
+		render(<ConfigurationWizard onComplete={onComplete} />);
+
+		const inputHandler = (useInput as any).mock.calls[0][0];
+		inputHandler('', { escape: true });
+
+		expect(onComplete).not.toHaveBeenCalled();
+	});
 });
