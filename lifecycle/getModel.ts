@@ -1,7 +1,8 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
-import { aisdk, AiSdkModel } from '@openai/agents-extensions/ai-sdk';
+import type { Model } from '@openai/agents';
+import { aisdk } from '@openai/agents-extensions/ai-sdk';
 import { createOllama, ollama } from 'ollama-ai-provider-v2';
 import { defaultOpenAIModel } from '../agent/defaults';
 import type { ModelProvider } from '../ink/models/config';
@@ -36,13 +37,21 @@ export function getProvider(modelName: string): ModelProvider {
 	return 'OpenAI';
 }
 
-export function getModel(modelName: string): AiSdkModel {
+export function getModel(modelName: string): Model {
+	// `aisdk()` returns an `AiSdkModel`, which implements `Model` but declares
+	// `getResponse`'s `rawUsage` as `Record<string, unknown> | undefined`. Under
+	// this repo's `exactOptionalPropertyTypes`, that is not assignable to core's
+	// `Model`, so bridge the upstream type-declaration mismatch with one cast.
+	return aisdk(getLanguageModel(modelName)) as Model;
+}
+
+function getLanguageModel(modelName: string) {
 	if (modelName.startsWith('claude-')) {
-		return aisdk(anthropic(modelName));
+		return anthropic(modelName);
 	}
 
 	if (modelName.startsWith('gemini-')) {
-		return aisdk(google(modelName));
+		return google(modelName);
 	}
 
 	if (modelName.startsWith('ollama-') || modelName.includes(':')) {
@@ -50,10 +59,10 @@ export function getModel(modelName: string): AiSdkModel {
 		const ollamaProvider = ollamaBaseUrl
 			? createOllama({ baseURL: ollamaBaseUrl, compatibility: 'strict' })
 			: ollama;
-		return aisdk(ollamaProvider(getModelName(modelName)));
+		return ollamaProvider(getModelName(modelName));
 	}
 
-	return aisdk(openai(modelName));
+	return openai(modelName);
 }
 
 export function getModelName(modelName: string): string {
