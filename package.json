@@ -9,9 +9,9 @@
 	},
 	"homepage": "https://github.com/harperfast",
 	"scripts": {
-		"dev": "tsup index.ts cli.ts --format esm --clean --dts --watch --external puppeteer",
+		"dev": "tsdown --watch",
 		"link": "npm run build && npm link",
-		"build": "tsup index.ts cli.ts --format esm --clean --dts --external puppeteer && cp node_modules/harper/schema.graphql dist/",
+		"build": "tsdown && cp node_modules/harper/schema.graphql dist/",
 		"commitlint": "commitlint --edit",
 		"start": "node ./dist/cli.js",
 		"lint": "oxlint --format stylish .",
@@ -31,8 +31,12 @@
 	"bin": {
 		"harper-agent": "./dist/cli.js"
 	},
+	"types": "./dist/index.d.ts",
 	"exports": {
-		".": "./dist/index.js"
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
 	},
 	"keywords": [],
 	"author": {
@@ -96,7 +100,7 @@
 		"oxlint": "^1.43.0",
 		"react-native-fs": "^2.20.0",
 		"semantic-release": "^25.0.3",
-		"tsup": "^8.5.1",
+		"tsdown": "^0.23.0",
 		"tsx": "^4.21.0",
 		"typescript": "^6.0.0",
 		"vitest": "^4.0.18"
