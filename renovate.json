@@ -32,6 +32,11 @@
 			"automerge": true
 		},
 		{
+			"description": "react-native-fs is declared only to keep npm from dropping it. alasql (nested under harper) lists it in optionalDependencies, and npm omits optional subtrees when it resolves a tree with no lockfile present -- which is what Renovate does when it regenerates package-lock.json. The result is a lockfile missing ~246 entries that `npm ci` then rejects. Declaring it at the root makes it survive that resolve. Nothing in this repo imports it, so there is no reason to take updates for it.",
+			"matchPackageNames": ["react-native-fs"],
+			"enabled": false
+		},
+		{
 			"description": "Hold conventional-changelog-conventionalcommits on v9: @semantic-release/release-notes-generator@14 bundles the Handlebars conventional-changelog-writer@8, and preset v10's function-based templates render empty release notes under writer@8. Drop once release-notes-generator ships a writer@9 major.",
 			"matchPackageNames": ["conventional-changelog-conventionalcommits"],
 			"allowedVersions": "<10"
