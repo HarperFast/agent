@@ -11,7 +11,9 @@ const ToolParameters = z.object({
 export async function execute({ selector, button, clickCount }: z.infer<typeof ToolParameters>) {
 	try {
 		const page = await getPage();
-		await page.click(selector, { button, clickCount });
+		// Puppeteer calls this `count`; passing `clickCount` was silently ignored, so
+		// multi-click requests always performed a single click.
+		await page.click(selector, { button, count: clickCount });
 		return `Successfully clicked on ${selector}`;
 	} catch (error) {
 		return `Error clicking on ${selector}: ${error}`;

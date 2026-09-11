@@ -31,7 +31,10 @@ async function getSkillsRead(): Promise<string[]> {
 	}
 }
 
-function pickExistingSkill(candidates: string[]): string | null {
+/** The skill names `getHarperSkillTool` actually accepts. */
+type HarperSkillName = (typeof harperSkills)[number];
+
+function pickExistingSkill(candidates: readonly HarperSkillName[]): HarperSkillName | null {
 	for (const c of candidates) { if (harperSkills.includes(c)) { return c; } }
 	return null;
 }
@@ -39,7 +42,7 @@ function pickExistingSkill(candidates: string[]): string | null {
 async function requiredSkillForOperation(
 	path: string,
 	type: 'create_file' | 'update_file' | 'delete_file' | 'overwrite_file',
-): Promise<string | null> {
+): Promise<HarperSkillName | null> {
 	if (type === 'delete_file') { return null; }
 	const p = normalizedPath(path);
 	const read = await getSkillsRead();

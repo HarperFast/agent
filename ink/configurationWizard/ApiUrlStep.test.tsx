@@ -20,7 +20,9 @@ describe('ApiUrlStep', () => {
 	it('renders API URL prompt for Ollama', () => {
 		const onConfirm = vi.fn();
 		const onBack = vi.fn();
-		const { lastFrame } = render(<ApiUrlStep provider="Ollama" onConfirm={onConfirm} onBack={onBack} />);
+		const { lastFrame } = render(
+			<ApiUrlStep provider="Ollama" defaultValue="" onConfirm={onConfirm} onBack={onBack} />,
+		);
 
 		expect(lastFrame()).toContain('Where are you hosting Ollama?');
 	});
@@ -28,7 +30,7 @@ describe('ApiUrlStep', () => {
 	it('calls onBack when ESC is pressed', () => {
 		const onConfirm = vi.fn();
 		const onBack = vi.fn();
-		render(<ApiUrlStep provider="Ollama" onConfirm={onConfirm} onBack={onBack} />);
+		render(<ApiUrlStep provider="Ollama" defaultValue="" onConfirm={onConfirm} onBack={onBack} />);
 
 		const inputHandler = (useInput as any).mock.calls[0][0];
 		inputHandler('', { escape: true });

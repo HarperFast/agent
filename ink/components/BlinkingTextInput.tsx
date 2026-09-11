@@ -182,7 +182,7 @@ export function BlinkingTextInput({
 
 			return (
 				<Box flexGrow={1} minWidth={1}>
-					<Text wrap="end">{displayContent}</Text>
+					<Text wrap="truncate-end">{displayContent}</Text>
 				</Box>
 			);
 		}
@@ -216,7 +216,7 @@ export function BlinkingTextInput({
 
 			result.push(
 				<Box key={lineIndex} flexGrow={1}>
-					<Text wrap="end">{lineContent}</Text>
+					<Text wrap="truncate-end">{lineContent}</Text>
 				</Box>,
 			);
 			if (lineIndex < lines.length - 1) {

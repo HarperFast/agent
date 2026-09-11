@@ -10,7 +10,8 @@ describe('ProviderStep', () => {
 
 	it('renders provider selection message', () => {
 		const onConfirm = vi.fn();
-		const { lastFrame } = render(<ProviderStep onConfirm={onConfirm} />);
+		const onExit = vi.fn();
+		const { lastFrame } = render(<ProviderStep defaultValue="" onConfirm={onConfirm} onExit={onExit} />);
 
 		expect(lastFrame()).toContain('What model provider would you like to use today?');
 	});
