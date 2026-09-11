@@ -212,11 +212,15 @@ export async function runAgentForOnePass(
 						hasUnknownPrices: sessionStats.hasUnknownPrices,
 					});
 
+					// `_maxTurns` is `number | null` upstream; null means "unset", in which case we
+					// keep the configured limit rather than clobbering it (a null here would make
+					// the `currentTurn + 1 >= maxTurns` check below fire immediately).
+					const nextMaxTurns = stream.state._maxTurns ?? trackedState.maxTurns;
 					if (
-						trackedState.currentTurn !== stream.state._currentTurn || trackedState.maxTurns !== stream.state._maxTurns
+						trackedState.currentTurn !== stream.state._currentTurn || trackedState.maxTurns !== nextMaxTurns
 					) {
 						trackedState.currentTurn = stream.state._currentTurn;
-						trackedState.maxTurns = stream.state._maxTurns;
+						trackedState.maxTurns = nextMaxTurns;
 						emitToListeners('SettingsUpdated', undefined);
 						if (trackedState.currentTurn + 1 >= trackedState.maxTurns) {
 							await pushNewItemsIntoSession();
@@ -318,7 +322,7 @@ export async function runAgentForOnePass(
 		});
 
 		trackedState.currentTurn = stream.state._currentTurn;
-		trackedState.maxTurns = stream.state._maxTurns;
+		trackedState.maxTurns = stream.state._maxTurns ?? trackedState.maxTurns;
 		emitToListeners('SettingsUpdated', undefined);
 
 		if (stream.interruptions?.length) {

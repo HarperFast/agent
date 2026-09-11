@@ -20,7 +20,9 @@ describe('ApiKeyStep', () => {
 	it('renders API key prompt for OpenAI', () => {
 		const onConfirm = vi.fn();
 		const onBack = vi.fn();
-		const { lastFrame } = render(<ApiKeyStep provider="OpenAI" onConfirm={onConfirm} onBack={onBack} />);
+		const { lastFrame } = render(
+			<ApiKeyStep provider="OpenAI" defaultValue="" onConfirm={onConfirm} onBack={onBack} />,
+		);
 
 		expect(lastFrame()).toContain('Can you provide us with your OpenAI API key?');
 		expect(lastFrame()).toContain('Get your key at: https://platform.openai.com/api-keys');
@@ -29,7 +31,7 @@ describe('ApiKeyStep', () => {
 	it('calls onBack when ESC is pressed', () => {
 		const onConfirm = vi.fn();
 		const onBack = vi.fn();
-		render(<ApiKeyStep provider="OpenAI" onConfirm={onConfirm} onBack={onBack} />);
+		render(<ApiKeyStep provider="OpenAI" defaultValue="" onConfirm={onConfirm} onBack={onBack} />);
 
 		const inputHandler = (useInput as any).mock.calls[0][0];
 		inputHandler('', { escape: true });

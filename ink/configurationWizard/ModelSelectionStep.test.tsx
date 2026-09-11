@@ -24,6 +24,7 @@ describe('ModelSelectionStep', () => {
 			<ModelSelectionStep
 				title="Pick a model"
 				models={['model-1', 'model-2']}
+				defaultValue=""
 				onConfirm={onConfirm}
 				onBack={onBack}
 			/>,
@@ -42,6 +43,7 @@ describe('ModelSelectionStep', () => {
 			<ModelSelectionStep
 				title="Pick a model"
 				models={['model-1']}
+				defaultValue=""
 				onConfirm={onConfirm}
 				onBack={onBack}
 			/>,
