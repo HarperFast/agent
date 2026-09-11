@@ -9,9 +9,9 @@
 	},
 	"homepage": "https://github.com/harperfast",
 	"scripts": {
-		"dev": "tsup index.ts cli.ts --format esm --clean --dts --watch --external puppeteer",
+		"dev": "tsup index.ts cli.ts --format esm --clean --watch --external puppeteer",
 		"link": "npm run build && npm link",
-		"build": "tsup index.ts cli.ts --format esm --clean --dts --external puppeteer && cp node_modules/harper/schema.graphql dist/",
+		"build": "tsup index.ts cli.ts --format esm --clean --external puppeteer && cp node_modules/harper/schema.graphql dist/",
 		"commitlint": "commitlint --edit",
 		"start": "node ./dist/cli.js",
 		"lint": "oxlint --format stylish .",
