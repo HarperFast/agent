@@ -55,15 +55,20 @@ export function hasKnownPrices(model: string | undefined, tier: ServiceTier = 'f
 	return !!model && model in MODEL_PRICES[tier];
 }
 
+// Usage token details from @openai/agents-core may nest further detail objects, so values are only
+// counted when they are numbers.
+type TokenDetailsInput = Array<{ [key: string]: unknown }> | { [key: string]: unknown };
+
 export function extractCachedTokens(
-	inputTokenDetails?: Array<Record<string, number>> | Record<string, number>,
+	inputTokenDetails?: TokenDetailsInput,
 ): number {
 	let cachedInputTokens = 0;
 	if (inputTokenDetails) {
 		const details = Array.isArray(inputTokenDetails) ? inputTokenDetails : [inputTokenDetails];
 		for (const inputTokenDetail of details) {
-			if (inputTokenDetail['cached_tokens']) {
-				cachedInputTokens += inputTokenDetail['cached_tokens'];
+			const cached = inputTokenDetail['cached_tokens'];
+			if (typeof cached === 'number') {
+				cachedInputTokens += cached;
 			}
 		}
 	}
@@ -74,7 +79,7 @@ export function calculateCost(
 	model: string | undefined,
 	inputTokens: number,
 	outputTokens: number,
-	inputTokenDetails: Array<Record<string, number>> | Record<string, number> | undefined,
+	inputTokenDetails: TokenDetailsInput | undefined,
 	tier: ServiceTier = 'flex',
 ): number {
 	if (!model) {
@@ -138,7 +143,7 @@ class CostTracker {
 	}
 
 	public extractCachedTokens(
-		inputTokenDetails?: Array<Record<string, number>> | Record<string, number>,
+		inputTokenDetails?: TokenDetailsInput,
 	): number {
 		return extractCachedTokens(inputTokenDetails);
 	}
